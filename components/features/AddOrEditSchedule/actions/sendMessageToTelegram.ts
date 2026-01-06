@@ -1,0 +1,88 @@
+"use server";
+
+import { bot } from "@/app/api/bot/route";
+import { prisma } from "@/lib/prisma";
+
+import dns from "dns";
+
+dns.setDefaultResultOrder("ipv4first");
+
+interface MessageToTelegramArgs {
+  userId: number;
+  address: string;
+  startTime: string;
+  endTime: string;
+  firstName: string;
+  lastName: string;
+  date: string;
+}
+
+interface TelegramNotificationResult {
+  toastText: string;
+  toastType: "success" | "error" | "warning";
+}
+
+function formatDateToDDMMYYYY(dateInput: string) {
+  const date = new Date(dateInput);
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}.${month}.${year}`;
+}
+
+export async function sendMessageToTelegram({
+  userId,
+  address,
+  startTime,
+  endTime,
+  firstName,
+  lastName,
+  date,
+}: MessageToTelegramArgs): Promise<TelegramNotificationResult> {
+  try {
+    const telegramAccount = await prisma.telegramAccount.findFirst({
+      where: { userId },
+    });
+
+    if (!telegramAccount?.chatId) {
+      return {
+        toastText:
+          "Уведомление не будет отправлено пользователю, он не написал боту команду /start",
+        toastType: "warning",
+      };
+    }
+
+    const formatDate = formatDateToDDMMYYYY(date);
+
+    const text =
+      `Дата: ${formatDate}\n\n` +
+      `Забронированное время аренды:\n` +
+      `С ${startTime} до ${endTime}\n\n` +
+      `Адрес: ${address}`;
+
+    await bot.sendMessage(telegramAccount.chatId, text);
+
+    const adminText =
+      `📌 Новая запись отправлена:\n` +
+      `Имя: ${firstName} ${lastName}\n` +
+      `Telegram: @${telegramAccount.username}\n\n` +
+      `Дата: ${formatDate}\n` +
+      `Время аренды: с ${startTime} до ${endTime}\n` +
+      `Адрес: ${address}`;
+
+    await bot.sendMessage(process.env.ADMIN_CHAT_ID!, adminText);
+
+    return {
+      toastText: "Уведомление о записи успешно отправлено!",
+      toastType: "success",
+    };
+  } catch (error) {
+    console.error("Telegram notification error:", error);
+    return {
+      toastText: "Не удалось отправить уведомление в Telegram",
+      toastType: "error",
+    };
+  }
+}
