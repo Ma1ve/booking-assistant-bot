@@ -345,6 +345,7 @@ function parseAndValidateTime(start: string, end: string, date: string) {
 
 const yoga = createYoga({
   schema,
+  graphqlEndpoint: "/",
   context: createContext,
   maskedErrors: false,
 });
