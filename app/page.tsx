@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 import { MonthCalendarClient } from "@/components/app/MonthCalendar";
 import { TIME_ZONE } from "@/components/shared/consts/timeZone";
+import { TelegramAuthGate } from "@/components/providers/TelegramAuthGate";
 
 export default async function Home() {
   const now = DateTime.now().setZone(TIME_ZONE);
@@ -46,9 +47,9 @@ export default async function Home() {
 
   return (
     <div className="flex justify-center h-full px-3.75">
-      <div>
+      <TelegramAuthGate>
         <MonthCalendarClient days={daysWithUserCount} />
-      </div>
+      </TelegramAuthGate>
     </div>
   );
 }
