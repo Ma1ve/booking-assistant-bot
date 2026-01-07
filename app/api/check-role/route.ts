@@ -10,7 +10,10 @@ export async function POST(req: NextRequest) {
     const { initData } = body;
 
     if (!initData) {
-      return NextResponse.json({ ok: false, error: "No initData provided" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: `No initData provided ${initData}` },
+        { status: 400 }
+      );
     }
 
     try {
