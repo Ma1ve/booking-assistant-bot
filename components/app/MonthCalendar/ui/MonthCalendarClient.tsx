@@ -17,6 +17,7 @@ export function MonthCalendarClient({ days }: MonthCalendarClientProps) {
   const [selectedDay, setSelectedDay] = useState<IDaySchedule | null>(null);
   const [access, setAccess] = useState(false);
   useEffect(() => {
+    /* @ts-ignore */
     const initData = window?.Telegram?.WebApp?.initData;
 
     fetch("/api/check-role", {
