@@ -7,6 +7,10 @@ export const bot = new TelegramBot(process.env.BOT_TOKEN!, {
   polling: false,
 });
 
+export async function GET() {
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const update = await req.json();
