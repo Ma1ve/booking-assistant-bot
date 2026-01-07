@@ -9,14 +9,10 @@ interface DayListProps {
 }
 
 export const DayList = ({ days, onSelectDay }: DayListProps) => {
-  const today = new Date().getDate();
-
   return (
-    <div className="p-2.5 grid grid-cols-7 gap-3 gap-y-7 mt-20 border-2 border-green-900 rounded-[10px] overflow-visible">
+    <div className="p-2.5 grid grid-cols-7 gap-3 gap-y-7 mt-7 border-2 border-green-900 rounded-[10px] overflow-visible">
       {days.map((day) => {
-        return (
-          <DayItem key={day.sheduleId} day={day} today={today} onClick={() => onSelectDay(day)} />
-        );
+        return <DayItem key={day.sheduleId} day={day} onClick={() => onSelectDay(day)} />;
       })}
     </div>
   );

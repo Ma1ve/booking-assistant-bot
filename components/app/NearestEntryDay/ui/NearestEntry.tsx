@@ -1,3 +1,6 @@
+import { DateTime } from "luxon";
+import { TIME_ZONE } from "@/components/shared/consts/timeZone";
+
 import { TimeScheduleItem } from "../../DaySheet";
 import { TodayUserSchedule } from "../types/todayClosestSchedule";
 
@@ -14,11 +17,11 @@ export const NearestEntry = (props: TodayUserSchedule) => {
     pastScheduleRecords,
   } = props;
 
-  const currDate = new Date();
+  const currDate = DateTime.now().setZone(TIME_ZONE).toJSDate();
 
   return (
     <>
-      <div className="my-2.5 text-lg flex justify-center items-center h-[43px]">
+      <div className="font-medium my-2.5 text-lg flex justify-center items-center h-[43px]">
         Ближайшая запись:
       </div>
 

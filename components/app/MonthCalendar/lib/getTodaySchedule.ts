@@ -1,7 +1,12 @@
+import { DateTime } from "luxon";
+import { TIME_ZONE } from "@/components/shared/consts/timeZone";
+
 import { IDaySchedule } from "../types/IDaySchedule";
 
 export function getTodaySchedule(days: IDaySchedule[]) {
-  const today = new Date().getDate();
+  const today = DateTime.now().setZone(TIME_ZONE);
 
-  return days.find((el) => el.date.getDate() === today) ?? null;
+  return (
+    days.find((el) => DateTime.fromJSDate(el.date).setZone(TIME_ZONE).hasSame(today, "day")) ?? null
+  );
 }

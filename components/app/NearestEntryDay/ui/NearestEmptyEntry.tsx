@@ -16,7 +16,7 @@ export const NearestEmptyEntry = () => {
           <EmptyMedia variant="icon">
             <BookSearch />
           </EmptyMedia>
-          <EmptyTitle>Ближайшей записи на сегодня нет</EmptyTitle>
+          <EmptyTitle className="font-medium">Ближайшей записи на сегодня нет</EmptyTitle>
           <EmptyDescription>
             Для создании записи нажмите <br />
             &quot;Приемы на сегодня&quot; &#8594; &quot;Добавить запись&quot;

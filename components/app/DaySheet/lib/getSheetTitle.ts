@@ -1,21 +1,13 @@
-const getTitleDayAndMonth = (day: Date | null) =>
-  day?.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-  });
+import { TIME_ZONE } from "@/components/shared/consts/timeZone";
+import { DateTime } from "luxon";
 
-const getWeekDayName = (day: Date | null) =>
-  day?.toLocaleDateString("ru-RU", {
-    weekday: "long",
-  });
+export const getSheetTitle = (day: Date): string => {
+  if (!day) return "";
 
-export const getSheetTitle = (day: Date) => {
-  const currDay = new Date(day);
+  const dt = DateTime.fromJSDate(day).setZone(TIME_ZONE).setLocale("ru-RU");
+  if (!dt.isValid) return "";
 
-  const titleDayOfMonth = getTitleDayAndMonth(currDay);
-  const titleOfWeek = getWeekDayName(day);
+  const title = dt.toFormat("d MMMM | cccc");
 
-  if (!titleDayOfMonth && !titleOfWeek) return "";
-
-  return `${titleDayOfMonth} | ${titleOfWeek}`;
+  return title;
 };

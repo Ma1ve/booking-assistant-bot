@@ -1,8 +1,6 @@
+import { DateTime } from "luxon";
+import { TIME_ZONE } from "../consts/timeZone";
+
 export function getFormatTime(date: Date): string {
-  const d = new Date(date);
-
-  const h = d.getHours().toString().padStart(2, "0");
-  const m = d.getMinutes().toString().padStart(2, "0");
-
-  return `${h}:${m}`;
+  return DateTime.fromJSDate(date).setZone(TIME_ZONE).toLocaleString(DateTime.TIME_24_SIMPLE);
 }

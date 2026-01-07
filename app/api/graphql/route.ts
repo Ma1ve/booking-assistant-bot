@@ -1,8 +1,11 @@
-import { createContext, GraphQLContext } from "@/lib/prisma";
+import { GraphQLError } from "graphql";
 import { createYoga, createSchema } from "graphql-yoga";
+import { DateTime } from "luxon";
+
+import { createContext, GraphQLContext } from "@/lib/prisma";
 
 import { getFormatTime } from "@/components/shared/lib/getFormatTime";
-import { GraphQLError } from "graphql";
+import { TIME_ZONE } from "@/components/shared/consts/timeZone";
 
 const schema = createSchema<GraphQLContext>({
   typeDefs: `
@@ -80,9 +83,11 @@ const schema = createSchema<GraphQLContext>({
   resolvers: {
     Query: {
       usersByDay: async (_parent, { date }, ctx) => {
+        const searchDate = DateTime.fromISO(date).setZone(TIME_ZONE).startOf("day").toJSDate();
+
         try {
           const day = await ctx.prisma.daySchedule.findFirst({
-            where: { date: new Date(date) },
+            where: { date: searchDate },
             include: {
               users: {
                 include: { user: true },
@@ -94,8 +99,9 @@ const schema = createSchema<GraphQLContext>({
             day?.users
               .map((dsu) => dsu.user)
               .sort((a, b) => {
-                const aTime = a.startTime.getHours() * 60 + a.startTime.getMinutes();
-                const bTime = b.startTime.getHours() * 60 + b.startTime.getMinutes();
+                const aTime = DateTime.fromJSDate(a.startTime).setZone(TIME_ZONE).valueOf();
+                const bTime = DateTime.fromJSDate(b.startTime).setZone(TIME_ZONE).valueOf();
+
                 return aTime - bTime;
               }) ?? [];
 
@@ -107,13 +113,11 @@ const schema = createSchema<GraphQLContext>({
       },
       todayClosestSchedule: async (_parent, _args, ctx) => {
         try {
-          const now = new Date();
+          const now = DateTime.now().setZone(TIME_ZONE);
+          const nowJSDate = now.toJSDate();
 
-          const startOfDay = new Date(now);
-          startOfDay.setHours(0, 0, 0, 0);
-
-          const endOfDay = new Date(now);
-          endOfDay.setHours(23, 59, 59, 999);
+          const startOfDay = now.startOf("day").toJSDate();
+          const endOfDay = now.endOf("day").toJSDate();
 
           const todaySchedule = await ctx.prisma.daySchedule.findFirst({
             where: {
@@ -135,11 +139,11 @@ const schema = createSchema<GraphQLContext>({
 
           const totalScheduleRecords = users.length;
 
-          const pastScheduleRecords = users.filter((u) => u.endTime < now).length;
+          const pastScheduleRecords = users.filter((u) => u.endTime < nowJSDate).length;
 
           const current =
-            users.find((u) => now >= u.startTime && now <= u.endTime) ??
-            users.find((u) => u.startTime > now) ??
+            users.find((u) => nowJSDate >= u.startTime && nowJSDate <= u.endTime) ??
+            users.find((u) => u.startTime > nowJSDate) ??
             null;
 
           if (!current) return null;
@@ -317,16 +321,26 @@ const schema = createSchema<GraphQLContext>({
 });
 
 function parseAndValidateTime(start: string, end: string, date: string) {
+  const baseDate = DateTime.fromISO(date).setZone(TIME_ZONE);
+
   const [startHours, startMinutes] = start.split(":").map(Number);
   const [endHours, endMinutes] = end.split(":").map(Number);
 
-  const now = new Date();
+  const startTime = baseDate.set({
+    hour: startHours,
+    minute: startMinutes,
+    second: 0,
+    millisecond: 0,
+  });
 
-  const startTime = new Date(date);
-  startTime.setHours(startHours, startMinutes, 0, 0);
+  const endTime = baseDate.set({
+    hour: endHours,
+    minute: endMinutes,
+    second: 0,
+    millisecond: 0,
+  });
 
-  const endTime = new Date(date);
-  endTime.setHours(endHours, endMinutes, 0, 0);
+  const now = DateTime.now().setZone(TIME_ZONE);
 
   if (startTime <= now) {
     throw new GraphQLError("Нельзя установить приём на уже прошедшее время", {
@@ -340,7 +354,7 @@ function parseAndValidateTime(start: string, end: string, date: string) {
     });
   }
 
-  return { startTime, endTime };
+  return { startTime: startTime.toJSDate(), endTime: endTime.toJSDate() };
 }
 
 const yoga = createYoga({

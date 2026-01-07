@@ -1,36 +1,38 @@
+import { DateTime } from "luxon";
 import { prisma } from "@/lib/prisma";
 
-import { Badge } from "@/components/ui/badge";
-
 import { MonthCalendarClient } from "@/components/app/MonthCalendar";
+import { TIME_ZONE } from "@/components/shared/consts/timeZone";
 
 export default async function Home() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+  const now = DateTime.now().setZone(TIME_ZONE);
 
-  const start = new Date(year, month, 1);
-  const end = new Date(year, month + 1, 0, 23, 59, 59);
+  const startOfMonth = now.startOf("month");
+  const endOfMonth = now.endOf("month");
 
   let days = await prisma.daySchedule.findMany({
-    where: { date: { gte: start, lte: end } },
+    where: { date: { gte: startOfMonth.toJSDate(), lte: endOfMonth.toJSDate() } },
     orderBy: { date: "asc" },
     include: { users: true },
   });
 
   if (days.length === 0) {
+    if (!now.isValid || !startOfMonth.isValid) {
+      throw new Error("Не удалось рассчитать даты для расписания");
+    }
+
     await prisma.dayScheduleUser.deleteMany();
     await prisma.daySchedule.deleteMany();
 
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInMonth = now.daysInMonth;
     const newDays = Array.from({ length: daysInMonth }, (_, i) => ({
-      date: new Date(year, month, i + 1),
+      date: startOfMonth.plus({ days: i }).toJSDate(),
     }));
 
     await prisma.daySchedule.createMany({ data: newDays });
 
     days = await prisma.daySchedule.findMany({
-      where: { date: { gte: start, lte: end } },
+      where: { date: { gte: startOfMonth.toJSDate(), lte: endOfMonth.toJSDate() } },
       orderBy: { date: "asc" },
       include: { users: true },
     });
@@ -42,19 +44,9 @@ export default async function Home() {
     userCount: day.users.length,
   }));
 
-  const fullDate = now?.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
   return (
     <div className="flex justify-center h-full px-3.75">
       <div>
-        <div className="text-center mt-10">
-          <Badge variant="secondary">{fullDate}</Badge>
-        </div>
-
         <MonthCalendarClient days={daysWithUserCount} />
       </div>
     </div>

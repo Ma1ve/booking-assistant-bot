@@ -1,18 +1,18 @@
+import { DateTime } from "luxon";
+import { TIME_ZONE } from "@/components/shared/consts/timeZone";
+
 interface DayFlagsArgs {
   date: Date;
-  today: number;
 }
 
-export const getDayFlags = ({ date, today }: DayFlagsArgs) => {
-  const jsDate = new Date(date);
-
-  const currDay = jsDate.getDate();
-  const dayOfWeek = jsDate.getDay();
+export const getDayFlags = ({ date }: DayFlagsArgs) => {
+  const now = DateTime.now().setZone(TIME_ZONE).startOf("day");
+  const dayDate = DateTime.fromJSDate(date).setZone(TIME_ZONE).startOf("day");
 
   return {
-    currDay,
-    isPast: currDay < today,
-    isToday: today === currDay,
-    isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+    currDay: dayDate.day,
+    isPast: dayDate < now,
+    isToday: dayDate.hasSame(now, "day"),
+    isWeekend: dayDate.weekday >= 6,
   };
 };

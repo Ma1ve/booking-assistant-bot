@@ -6,12 +6,11 @@ import { IDaySchedule } from "../types/IDaySchedule";
 
 interface DayItemProps {
   day: IDaySchedule;
-  today: number;
   onClick: () => void;
 }
 
-export const DayItem = ({ day, today, onClick }: DayItemProps) => {
-  const { currDay, isToday, isPast, isWeekend } = getDayFlags({ date: new Date(day.date), today });
+export const DayItem = ({ day, onClick }: DayItemProps) => {
+  const { currDay, isToday, isPast, isWeekend } = getDayFlags({ date: day.date });
 
   return (
     <div
