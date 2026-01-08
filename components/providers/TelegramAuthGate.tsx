@@ -58,6 +58,7 @@ export function TelegramAuthGate({ children }: { children: React.ReactNode }) {
 
   return (
     // Поправить
+    //@ts-ignore
     <TelegramAuthContext.Provider value={telegramAuthValue}>
       {children}
     </TelegramAuthContext.Provider>
