@@ -6,8 +6,7 @@ const ADMIN_USERNAME = "malfeag";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { initData } = body;
+    const { initData } = await req.json();
 
     if (!initData) {
       return NextResponse.json(

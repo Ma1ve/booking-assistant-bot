@@ -51,6 +51,8 @@ const schema = createSchema<GraphQLContext>({
       usersByDay(date: String!): [User!]!
 
       todayClosestSchedule: UserWithTotalScheduleRecords 
+
+      getAllUserSchedules(chatId: String!): [DayScheduleUser!]!
     }
   
   type Mutation {
@@ -77,11 +79,47 @@ const schema = createSchema<GraphQLContext>({
     address:   String!
     telegram:  String!
     date: String!
-  }
 
+}
   `,
   resolvers: {
     Query: {
+      getAllUserSchedules: async (_parent, { chatId }, ctx) => {
+        try {
+          const now = DateTime.now().setZone(TIME_ZONE);
+
+          const startTimeFromCurrDate = now.toJSDate();
+          const endOfMonth = now.endOf("month").toJSDate();
+
+          const allSchedules = await ctx.prisma.dayScheduleUser.findMany({
+            where: {
+              user: {
+                telegramAccounts: {
+                  some: { chatId: String(chatId) },
+                },
+              },
+              daySchedule: {
+                date: {
+                  gte: startTimeFromCurrDate,
+                  lte: endOfMonth,
+                },
+              },
+            },
+            include: {
+              user: true,
+              daySchedule: true,
+            },
+            orderBy: {
+              user: { startTime: "asc" },
+            },
+          });
+
+          return allSchedules;
+        } catch (error) {
+          console.error("usersByDay error:", error);
+          throw new Error("Failed to load users by day");
+        }
+      },
       usersByDay: async (_parent, { date }, ctx) => {
         const searchDate = DateTime.fromISO(date).setZone(TIME_ZONE).startOf("day").toJSDate();
 

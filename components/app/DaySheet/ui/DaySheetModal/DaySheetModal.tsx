@@ -10,7 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import { IDaySchedule } from "@/components/app/MonthCalendar";
+import { IDaySchedule } from "@/components/app/AdminMonthSchedule";
 
 import { TimeSchedule } from "../TimeSchedule/TimeSchedule";
 

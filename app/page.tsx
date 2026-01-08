@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { prisma } from "@/lib/prisma";
 
-import { MonthCalendarClient } from "@/components/app/MonthCalendar";
+import { RoleView } from "@/components/app/RoleView/ui/RoleView";
 import { TIME_ZONE } from "@/components/shared/consts/timeZone";
 import { TelegramAuthGate } from "@/components/providers/TelegramAuthGate";
 
@@ -47,9 +47,11 @@ export default async function Home() {
 
   return (
     <div className="flex justify-center h-full px-3.75">
-      <TelegramAuthGate>
-        <MonthCalendarClient days={daysWithUserCount} />
-      </TelegramAuthGate>
+      <div>
+        <TelegramAuthGate>
+          <RoleView days={daysWithUserCount} />
+        </TelegramAuthGate>
+      </div>
     </div>
   );
 }

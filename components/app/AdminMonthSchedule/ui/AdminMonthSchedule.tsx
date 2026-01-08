@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 
 import { NearesetEntryDay } from "@/components/app/NearestEntryDay";
@@ -9,11 +7,11 @@ import { MonthCalendar } from "./MonthCalendar";
 import { IDaySchedule } from "../types/IDaySchedule";
 import { getTodaySchedule } from "../lib/getTodaySchedule";
 
-interface MonthCalendarClientProps {
+interface AdminMonthScheduleProps {
   days: IDaySchedule[];
 }
 
-export function MonthCalendarClient({ days }: MonthCalendarClientProps) {
+export function AdminMonthSchedule({ days }: AdminMonthScheduleProps) {
   const [selectedDay, setSelectedDay] = useState<IDaySchedule | null>(null);
 
   const handleOpenTodaySchedule = () => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { IDaySchedule } from "@/components/app/MonthCalendar/types/IDaySchedule";
+import { IDaySchedule } from "@/components/app/AdminMonthSchedule/types/IDaySchedule";
 import { AddOrEditScheduleModal, TUserForm } from "@/components/features/AddOrEditSchedule";
 
 import { ScheduleMode } from "../../types/ScheduleMode";
