@@ -12,6 +12,7 @@ interface UserMonthScheduleProps {
 }
 
 export const UserMonthSchedule = ({ chatId }: UserMonthScheduleProps) => {
+  console.log(chatId, "chatId");
   const { schedules, loading, error } = useUserSchedules(chatId);
 
   if (loading) {

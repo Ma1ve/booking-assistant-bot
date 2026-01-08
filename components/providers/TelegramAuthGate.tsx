@@ -36,7 +36,7 @@ export function TelegramAuthGate({ children }: { children: React.ReactNode }) {
         if (data.ok) {
           setAllowed(true);
           setIsAdmin(data.isAdmin);
-          setChatId(data.user.id);
+          setChatId(String(data.user.id));
           console.log(data, "data");
           console.log("Доступ разрешён");
         } else {
