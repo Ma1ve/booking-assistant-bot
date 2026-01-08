@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["picsum.photos", "github.com"],
+    domains: ["picsum.photos", "github.com", "cdn.shadcnstudio.com", "i.pinimg.com"],
   },
   async headers() {
     return [

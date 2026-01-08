@@ -21,7 +21,7 @@ export const NearestEntry = (props: TodayUserSchedule) => {
 
   return (
     <>
-      <div className="font-medium my-2.5 text-lg flex justify-center items-center h-[43px]">
+      <div className="font-medium my-2.5 text-lg flex justify-center items-center h-[43px] bg-black">
         Ближайшая запись:
       </div>
 

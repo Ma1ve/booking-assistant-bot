@@ -40,7 +40,15 @@ export async function sendMessageToTelegram({
 }: MessageToTelegramArgs): Promise<TelegramNotificationResult> {
   try {
     const telegramAccount = await prisma.telegramAccount.findFirst({
-      where: { userId },
+      where: {
+        person: {
+          users: {
+            some: {
+              id: userId,
+            },
+          },
+        },
+      },
     });
 
     if (!telegramAccount?.chatId) {

@@ -46,12 +46,26 @@ export default async function Home() {
   }));
 
   return (
-    <div className="flex justify-center h-full px-3.75">
-      <div>
-        <TelegramAuthGate>
-          <RoleView days={daysWithUserCount} />
-        </TelegramAuthGate>
-      </div>
-    </div>
+    <TelegramAuthGate>
+      <RoleView days={daysWithUserCount} />
+    </TelegramAuthGate>
+
+    // <div className="relative min-h-screen w-full flex justify-center px-3.75 overflow-hidden">
+    //   {/* Фоновое изображение на весь экран */}
+    //   <div className="absolute inset-0 -z-10">
+    //     <img
+    //       src="https://i.pinimg.com/736x/91/03/f4/9103f4440d01ed31d17957d38a9f4df3.jpg"
+    //       alt="Background"
+    //       className="w-full h-full object-cover brightness-50"
+    //     />
+    //   </div>
+
+    //   {/* Основной контент */}
+    //   <div className="relative z-10 w-full max-w-sm">
+    //     <TelegramAuthGate>
+    //       <RoleView days={daysWithUserCount} />
+    //     </TelegramAuthGate>
+    //   </div>
+    // </div>
   );
 }

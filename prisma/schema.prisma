@@ -7,19 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  firstName String
-  lastName  String
-  startTime DateTime
-  endTime   DateTime
-  address   String
-  telegram  String?
-
-  schedules        DayScheduleUser[]
-  telegramAccounts TelegramAccount[]
-}
-
 model DaySchedule {
   id    Int               @id @default(autoincrement())
   date  DateTime
@@ -35,11 +22,32 @@ model DayScheduleUser {
   @@id([userId, dayScheduleId])
 }
 
+model User {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  startTime DateTime
+  endTime   DateTime
+  address   String
+
+  personId Int?
+  person   Person? @relation(fields: [personId], references: [id])
+
+  schedules DayScheduleUser[]
+}
+
+model Person {
+  id Int @id @default(autoincrement())
+
+  users    User[]
+  telegram TelegramAccount?
+}
+
 model TelegramAccount {
   id       Int     @id @default(autoincrement())
-  chatId   String  @unique
+  chatId   String? @unique
   username String?
 
-  userId Int?
-  user   User? @relation(fields: [userId], references: [id])
+  personId Int?    @unique
+  person   Person? @relation(fields: [personId], references: [id])
 }

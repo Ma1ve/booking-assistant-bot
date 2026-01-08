@@ -9,7 +9,6 @@ export const GET_CLOSEST_SCHEDULE_TODAY = gql`
       address
       startTime
       endTime
-      telegram
       totalScheduleRecords
       pastScheduleRecords
     }

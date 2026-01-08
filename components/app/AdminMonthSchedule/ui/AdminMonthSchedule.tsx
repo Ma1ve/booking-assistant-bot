@@ -20,10 +20,12 @@ export function AdminMonthSchedule({ days }: AdminMonthScheduleProps) {
   };
 
   return (
-    <>
-      <NearesetEntryDay handleOpenTodaySchedule={handleOpenTodaySchedule} />
+    <div className="flex justify-center h-full px-3.75">
+      <div>
+        <NearesetEntryDay handleOpenTodaySchedule={handleOpenTodaySchedule} />
 
-      <MonthCalendar days={days} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
-    </>
+        <MonthCalendar days={days} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
+      </div>
+    </div>
   );
 }

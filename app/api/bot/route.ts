@@ -24,27 +24,67 @@ export async function POST(req: NextRequest) {
     const chatId = update.message.chat.id.toString();
     const username = update.message.chat.username ?? null;
 
-    const telegramAccount = await prisma.telegramAccount.upsert({
-      where: { chatId },
-      update: {
-        username,
-      },
-      create: {
-        chatId,
-        username,
-      },
-    });
+    // const telegramAccount = await prisma.telegramAccount.upsert({
+    //   where: { chatId },
+    //   update: {
+    //     username,
+    //   },
+    //   create: {
+    //     chatId,
+    //     username,
+    //   },
+    // });
 
-    if (username && !telegramAccount.userId) {
+    // if (username && !telegramAccount.userId) {
+    //   const user = await prisma.user.findFirst({
+    //     where: { telegram: username },
+    //   });
+
+    //   if (user) {
+    //     await prisma.telegramAccount.update({
+    //       where: { chatId },
+    //       data: { userId: user.id },
+    //     });
+    //   }
+    // }
+
+    if (username) {
+      let telegramAccount = await prisma.telegramAccount.findUnique({ where: { chatId } });
+      let personId: number | null = null;
+
+      if (telegramAccount) {
+        if (!telegramAccount.personId) {
+          const person = await prisma.person.create({});
+          personId = person.id;
+
+          await prisma.telegramAccount.update({
+            where: { id: telegramAccount.id },
+            data: { personId },
+          });
+        } else {
+          personId = telegramAccount.personId;
+        }
+      } else {
+        const person = await prisma.person.create({ data: {} });
+        personId = person.id;
+
+        telegramAccount = await prisma.telegramAccount.create({
+          data: { chatId, username, personId },
+        });
+      }
+
       const user = await prisma.user.findFirst({
-        where: { telegram: username },
+        where: {
+          person: {
+            telegram: {
+              username: username,
+            },
+          },
+        },
       });
 
       if (user) {
-        await prisma.telegramAccount.update({
-          where: { chatId },
-          data: { userId: user.id },
-        });
+        await prisma.user.update({ where: { id: user.id }, data: { personId } });
       }
     }
 

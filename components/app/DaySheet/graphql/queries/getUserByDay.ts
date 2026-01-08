@@ -6,9 +6,9 @@ export const GET_USER_BY_DAY = gql`
       id
       firstName
       lastName
+      telegram
       startTime
       endTime
-      telegram
       address
     }
   }

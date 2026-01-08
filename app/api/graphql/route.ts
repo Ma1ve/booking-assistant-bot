@@ -9,52 +9,64 @@ import { TIME_ZONE } from "@/components/shared/consts/timeZone";
 
 const schema = createSchema<GraphQLContext>({
   typeDefs: `
-    type User {
-      id: ID!
-      firstName: String!
-      lastName:  String!
-      startTime: String!
-      endTime:   String!
-      address:   String!
-      telegram:  String!
-      schedules: [DayScheduleUser!]!
-    }
-    
-    type DaySchedule {
-      id: ID!
-      date: String!  
-      users: [DayScheduleUser!]!
-      userCount: Int!
-    }
+  type User {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    startTime: String!
+    endTime: String!
+    address: String!
+    person: Person
+    telegram: String
+    schedules: [DayScheduleUser!]!
+  }
 
-    type DayScheduleUser {
-      userId: ID!
-      dayScheduleId: ID!
-      user: User!
-      daySchedule: DaySchedule!
-    }
+  type Person {
+    id: ID!
+    telegramAccount: TelegramAccount
+    users: [User!]!
+  }
 
-    type UserWithTotalScheduleRecords {
-      id: ID!
-      firstName: String!
-      lastName:  String!
-      startTime: String!
-      endTime:   String!
-      address:   String!
-      telegram:  String!
-  
-      totalScheduleRecords: String!
-      pastScheduleRecords: String!
-    }
+  type TelegramAccount {
+    id: ID!
+    chatId: String!
+    username: String
+  }
 
-    type Query {
-      usersByDay(date: String!): [User!]!
+  type DaySchedule {
+    id: ID!
+    date: String!
+    users: [DayScheduleUser!]!
+    userCount: Int!
+  }
 
-      todayClosestSchedule: UserWithTotalScheduleRecords 
+  type DayScheduleUser {
+    userId: ID!
+    dayScheduleId: ID!
+    user: User!
+    daySchedule: DaySchedule!
+  }
 
-      getAllUserSchedules(chatId: String!): [DayScheduleUser!]!
-    }
-  
+  type UserWithTotalScheduleRecords {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    startTime: String!
+    endTime: String!
+    address: String!
+    person: Person
+    telegram: String
+
+    totalScheduleRecords: String!
+    pastScheduleRecords: String!
+  }
+
+  type Query {
+    usersByDay(date: String!): [User!]!
+    todayClosestSchedule: UserWithTotalScheduleRecords
+    getAllUserSchedules(chatId: String!): [DayScheduleUser!]!
+  }
+
   type Mutation {
     updateSchedule(
       userId: Int!
@@ -62,56 +74,67 @@ const schema = createSchema<GraphQLContext>({
     ): User!
 
     createSchedule(
-      scheduleId: Int! 
+      scheduleId: Int!
       input: UserInput!
     ): User!
 
     deleteScheduleById(
-      userId: Int!   
+      userId: Int!
     ): User
   }
 
   input UserInput {
     firstName: String!
-    lastName:  String!
+    lastName: String!
     startTime: String!
-    endTime:   String!
-    address:   String!
-    telegram:  String!
+    endTime: String!
+    address: String!
+    telegram: String
     date: String!
-
-}
-  `,
+  }
+`,
   resolvers: {
     Query: {
       getAllUserSchedules: async (_parent, { chatId }, ctx) => {
         try {
           const now = DateTime.now().setZone(TIME_ZONE);
-
-          const startTimeFromCurrDate = now.toJSDate();
+          console.log(now, "now");
+          const startOfHour = now.toJSDate();
           const endOfMonth = now.endOf("month").toJSDate();
+
+          console.log(startOfHour, "startOfHour");
 
           const allSchedules = await ctx.prisma.dayScheduleUser.findMany({
             where: {
               user: {
-                telegramAccounts: {
-                  some: { chatId: String(chatId) },
+                person: {
+                  telegram: {
+                    is: {
+                      chatId: String(chatId),
+                    },
+                  },
                 },
               },
               daySchedule: {
                 date: {
-                  gte: startTimeFromCurrDate,
+                  // gte: startOfHour,
                   lte: endOfMonth,
                 },
               },
             },
             include: {
-              user: true,
+              user: {
+                include: {
+                  person: {
+                    include: {
+                      telegram: true,
+                    },
+                  },
+                },
+              },
               daySchedule: true,
             },
-            orderBy: {
-              user: { startTime: "asc" },
-            },
+            orderBy: [{ daySchedule: { date: "asc" } }, { user: { startTime: "asc" } }],
           });
 
           return allSchedules;
@@ -126,9 +149,14 @@ const schema = createSchema<GraphQLContext>({
         try {
           const day = await ctx.prisma.daySchedule.findFirst({
             where: { date: searchDate },
+
             include: {
               users: {
-                include: { user: true },
+                include: {
+                  user: {
+                    include: { person: { include: { telegram: true } } },
+                  },
+                },
               },
             },
           });
@@ -201,7 +229,11 @@ const schema = createSchema<GraphQLContext>({
     User: {
       startTime: (parent) => getFormatTime(parent.startTime),
       endTime: (parent) => getFormatTime(parent.endTime),
-      telegram: (parent) => (parent.telegram ? `@${parent.telegram}` : null),
+
+      telegram: (parent) => {
+        const username = parent.person?.telegram?.username;
+        return username ? `@${username}` : null;
+      },
     },
 
     UserWithTotalScheduleRecords: {
@@ -238,7 +270,6 @@ const schema = createSchema<GraphQLContext>({
             data: {
               firstName: input.firstName,
               lastName: input.lastName,
-              telegram: input.telegram,
               startTime,
               endTime,
               address: input.address,
@@ -246,9 +277,41 @@ const schema = createSchema<GraphQLContext>({
           });
 
           if (input.telegram) {
-            await ctx.prisma.telegramAccount.updateMany({
+            let telegramAccount = await ctx.prisma.telegramAccount.findFirst({
               where: { username: input.telegram },
-              data: { userId: user.id },
+            });
+
+            let personId: number | null = null;
+
+            if (telegramAccount) {
+              if (!telegramAccount.personId) {
+                const person = await ctx.prisma.person.create({});
+                personId = person.id;
+
+                await ctx.prisma.telegramAccount.update({
+                  where: { id: telegramAccount.id },
+                  data: { personId },
+                });
+              } else {
+                personId = telegramAccount.personId;
+              }
+            } else {
+              const person = await ctx.prisma.person.create({
+                data: {},
+              });
+              personId = person.id;
+
+              telegramAccount = await ctx.prisma.telegramAccount.create({
+                data: {
+                  username: input.telegram,
+                  personId,
+                },
+              });
+            }
+
+            await ctx.prisma.user.update({
+              where: { id: user.id },
+              data: { personId },
             });
           }
 
@@ -304,7 +367,6 @@ const schema = createSchema<GraphQLContext>({
             data: {
               firstName: input.firstName,
               lastName: input.lastName,
-              telegram: input.telegram,
               startTime,
               endTime,
               address: input.address,
@@ -312,9 +374,39 @@ const schema = createSchema<GraphQLContext>({
           });
 
           if (input.telegram) {
-            await ctx.prisma.telegramAccount.updateMany({
+            let telegramAccount = await ctx.prisma.telegramAccount.findFirst({
               where: { username: input.telegram },
-              data: { userId: userId },
+            });
+
+            let personId: number | null = null;
+
+            if (telegramAccount) {
+              if (!telegramAccount.personId) {
+                const person = await ctx.prisma.person.create({});
+                personId = person.id;
+
+                await ctx.prisma.telegramAccount.update({
+                  where: { id: telegramAccount.id },
+                  data: { personId },
+                });
+              } else {
+                personId = telegramAccount.personId;
+              }
+            } else {
+              const person = await ctx.prisma.person.create({});
+              personId = person.id;
+
+              telegramAccount = await ctx.prisma.telegramAccount.create({
+                data: {
+                  username: input.telegram,
+                  personId,
+                },
+              });
+            }
+
+            await ctx.prisma.user.update({
+              where: { id: userId },
+              data: { personId },
             });
           }
 
