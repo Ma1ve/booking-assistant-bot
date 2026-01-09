@@ -105,8 +105,8 @@ export const TimeScheduleItem = ({
           </div>
         </ItemMedia>
         <ItemContent>
-          <ItemTitle className="line-clamp-1">{name}</ItemTitle>
-          <ItemDescription>{address}</ItemDescription>
+          <ItemTitle className="line-clamp-1 break-all">{name}</ItemTitle>
+          <ItemDescription className="line-clamp-2 break-all">{address}</ItemDescription>
         </ItemContent>
         <ItemContent className="flex-none text-center right-6 -bottom-5">
           <ItemDescription>

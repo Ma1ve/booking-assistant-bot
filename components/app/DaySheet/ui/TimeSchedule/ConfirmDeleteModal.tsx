@@ -85,13 +85,13 @@ export function ConfirmDeleteModal({
                 </div>
 
                 <div className="flex flex-col">
-                  <span className="text-white font-medium">{name}</span>
+                  <span className="text-white font-medium break-all line-clamp-1">{name}</span>
                 </div>
               </div>
 
               <div className="flex flex-col">
-                <span className="text-sm text-zinc-400">Адрес</span>
-                <span className="text-white">{activeSchedule.address}</span>
+                <span className="text-sm text-zinc-400 ">Адрес</span>
+                <span className="text-white break-all line-clamp-3">{activeSchedule.address}</span>
               </div>
 
               <div className="flex justify-center items-center">
