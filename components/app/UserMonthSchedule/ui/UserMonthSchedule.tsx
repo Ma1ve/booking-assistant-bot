@@ -39,7 +39,7 @@ export const UserMonthSchedule = ({ chatId }: UserMonthScheduleProps) => {
       </div>
 
       <div className={cn("relative z-10 h-full overflow-y-auto")}>
-        {!isScheduleListEmpty ? (
+        {isScheduleListEmpty ? (
           <UserMonthScheduleEmpty />
         ) : (
           <UserMonthScheduleList userScheduleList={schedules} />

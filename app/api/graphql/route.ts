@@ -115,7 +115,7 @@ const schema = createSchema<GraphQLContext>({
               },
               daySchedule: {
                 date: {
-                  // gte: startOfHour,
+                  gte: startOfHour,
                   lte: endOfMonth,
                 },
               },
