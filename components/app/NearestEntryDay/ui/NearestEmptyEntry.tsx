@@ -10,7 +10,7 @@ import { BookSearch } from "lucide-react";
 
 export const NearestEmptyEntry = () => {
   return (
-    <div className="flex justify-center items-center">
+    <div className="flex justify-center items-center h-[205px]">
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">

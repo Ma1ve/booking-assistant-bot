@@ -8,6 +8,7 @@ import { NearestEntry } from "./NearestEntry";
 import { NearesetEntryDayLoader } from "./NearesetEntryDayLoader";
 
 import { useClosestScheduleToday } from "../hooks/useClosestScheduleToday";
+import { NearesetEntryDayError } from "./NearesetEntryDayError";
 
 interface NearesetEntryDayProps {
   handleOpenTodaySchedule: () => void;
@@ -21,13 +22,13 @@ export function NearesetEntryDay({ handleOpenTodaySchedule }: NearesetEntryDayPr
   }
 
   if (error) {
-    <NearesetEntryDayLoader />;
+    <NearesetEntryDayError />;
   }
 
   const isScheduleNotExist = schedule === null;
 
   return (
-    <div className="border-2 rounded-[10px] mt-10 border-[#27272a] h-[225px]">
+    <div className="border-2 rounded-[10px] mt-10 border-[#27272a]">
       {isScheduleNotExist ? <NearestEmptyEntry /> : <NearestEntry {...schedule} />}
 
       <Button
