@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
 
     console.log("Получено обновление от Telegram:", update);
 
-    // if (update.message?.text !== "/start" || update.message?.text !== "/info") {
-    //   return NextResponse.json({ ok: true });
-    // }
+    if (update.message?.text !== "/start" && update.message?.text !== "/info") {
+      return NextResponse.json({ ok: true });
+    }
 
     const chatId = update.message.chat.id.toString();
     const username = update.message.chat.username ?? null;
