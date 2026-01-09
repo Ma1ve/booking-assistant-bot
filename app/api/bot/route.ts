@@ -31,33 +31,9 @@ export async function POST(req: NextRequest) {
         `С его помощью вы сможете просматривать ваши текущие записи, получать уведомления. \n\n` +
         `Нажмите /start чтобы начать`;
 
-      await bot.sendMessage(process.env.ADMIN_CHAT_ID!, infoText);
+      await bot.sendMessage(chatId, infoText);
       return NextResponse.json({ ok: true });
     }
-
-    // const telegramAccount = await prisma.telegramAccount.upsert({
-    //   where: { chatId },
-    //   update: {
-    //     username,
-    //   },
-    //   create: {
-    //     chatId,
-    //     username,
-    //   },
-    // });
-
-    // if (username && !telegramAccount.userId) {
-    //   const user = await prisma.user.findFirst({
-    //     where: { telegram: username },
-    //   });
-
-    //   if (user) {
-    //     await prisma.telegramAccount.update({
-    //       where: { chatId },
-    //       data: { userId: user.id },
-    //     });
-    //   }
-    // }
 
     if (username) {
       let telegramAccount = await prisma.telegramAccount.findUnique({ where: { chatId } });
