@@ -98,11 +98,9 @@ const schema = createSchema<GraphQLContext>({
       getAllUserSchedules: async (_parent, { chatId }, ctx) => {
         try {
           const now = DateTime.now().setZone(TIME_ZONE);
-          console.log(now, "now");
+
           const startOfHour = now.toJSDate();
           const endOfMonth = now.endOf("month").toJSDate();
-
-          console.log(startOfHour, "startOfHour");
 
           const allSchedules = await ctx.prisma.dayScheduleUser.findMany({
             where: {
@@ -117,7 +115,7 @@ const schema = createSchema<GraphQLContext>({
               },
               daySchedule: {
                 date: {
-                  // gte: startOfHour,
+                  gte: startOfHour,
                   lte: endOfMonth,
                 },
               },

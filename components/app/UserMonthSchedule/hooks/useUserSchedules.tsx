@@ -24,7 +24,7 @@ export function useUserSchedules(chatId: string) {
       date: DateTime.fromMillis(Number(item.daySchedule.date))
         .setZone("Europe/Moscow")
         .setLocale("ru")
-        .toFormat("dd LLLL yyyy"),
+        .toFormat("dd MMMM yyyy"),
       startTime: item.user.startTime,
       endTime: item.user.endTime,
       address: item.user.address,

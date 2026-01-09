@@ -1,3 +1,6 @@
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+
 import { UserMonthScheduleList } from "./UserMonthScheduleList";
 
 import { UserMonthScheduleError } from "./UserMonthScheduleError";
@@ -5,14 +8,11 @@ import { UserMonthScheduleLoader } from "./UserMonthScheduleLoader";
 import { useUserSchedules } from "../hooks/useUserSchedules";
 import { UserMonthScheduleEmpty } from "./UserMonthScheduleEmpry";
 
-import Image from "next/image";
-
 interface UserMonthScheduleProps {
   chatId: string;
 }
 
 export const UserMonthSchedule = ({ chatId }: UserMonthScheduleProps) => {
-  console.log(chatId, "chatId");
   const { schedules, loading, error } = useUserSchedules(chatId);
 
   if (loading) {
@@ -23,11 +23,13 @@ export const UserMonthSchedule = ({ chatId }: UserMonthScheduleProps) => {
     return <UserMonthScheduleError />;
   }
 
+  const isScheduleListEmpty = schedules.length === 0;
+
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <Image
-          src="https://i.pinimg.com/736x/91/03/f4/9103f4440d01ed31d17957d38a9f4df3.jpg"
+          src="https://i.pinimg.com/736x/f5/64/9b/f5649bc7e498880585e7bb7ac55cfb3f.jpg"
           alt="Background"
           fill
           priority
@@ -36,23 +38,13 @@ export const UserMonthSchedule = ({ chatId }: UserMonthScheduleProps) => {
         />
       </div>
 
-      {schedules.length === 0 ? (
-        <div className="relative z-10 h-full overflow-y-auto mx-5">
-          <UserMonthScheduleEmpty />
-        </div>
-      ) : (
-        <div className="relative z-10 h-full overflow-y-auto">
-          <UserMonthScheduleList userScheduleList={schedules} />
-        </div>
-      )}
-
-      {/* <div className="relative z-10 h-full overflow-y-auto mx-5">
-        {schedules.length === 0 ? (
+      <div className={cn("relative z-10 h-full overflow-y-auto")}>
+        {!isScheduleListEmpty ? (
           <UserMonthScheduleEmpty />
         ) : (
-        
+          <UserMonthScheduleList userScheduleList={schedules} />
         )}
-      </div> */}
+      </div>
     </div>
   );
 };

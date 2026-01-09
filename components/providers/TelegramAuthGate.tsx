@@ -20,7 +20,6 @@ export function useTelegramAuth() {
 }
 
 export function TelegramAuthGate({ children }: { children: React.ReactNode }) {
-  const [allowed, setAllowed] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);
 
@@ -34,10 +33,8 @@ export function TelegramAuthGate({ children }: { children: React.ReactNode }) {
       .then((res) => res.json())
       .then((data) => {
         if (data.ok) {
-          setAllowed(true);
           setIsAdmin(data.isAdmin);
           setChatId(String(data.user.id));
-          console.log(data, "data");
           console.log("Доступ разрешён");
         } else {
           console.warn("Доступ запрещён:", data.error);
@@ -46,19 +43,17 @@ export function TelegramAuthGate({ children }: { children: React.ReactNode }) {
   }, []);
 
   const telegramAuthValue = useMemo(() => {
-    return { isAdmin: isAdmin, chatId: chatId };
+    return { isAdmin: isAdmin as boolean, chatId: chatId as string };
   }, [isAdmin, chatId]);
 
-  if (allowed === null || isAdmin === null || chatId === null)
+  if (isAdmin === null || chatId === null)
     return (
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center h-full">
         <Spinner className="size-15" />
       </div>
     );
 
   return (
-    // Поправить
-    //@ts-ignore
     <TelegramAuthContext.Provider value={telegramAuthValue}>
       {children}
     </TelegramAuthContext.Provider>

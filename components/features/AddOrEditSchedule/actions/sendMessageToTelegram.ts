@@ -61,21 +61,21 @@ export async function sendMessageToTelegram({
 
     const formatDate = formatDateToDDMMYYYY(date);
 
-    const text =
-      `Дата: ${formatDate}\n\n` +
-      `Забронированное время аренды:\n` +
-      `С ${startTime} до ${endTime}\n\n` +
-      `Адрес: ${address}`;
+    const userText =
+      `📌 Вы записаны:\n` +
+      `Дата: ${formatDate}\n` +
+      `Время приема: с ${startTime} до ${endTime}\n\n` +
+      `📍 Адрес: ${address}`;
 
-    await bot.sendMessage(telegramAccount.chatId, text);
+    await bot.sendMessage(telegramAccount.chatId, userText);
 
     const adminText =
       `📌 Новая запись отправлена:\n` +
       `Имя: ${firstName} ${lastName}\n` +
       `Telegram: @${telegramAccount.username}\n\n` +
       `Дата: ${formatDate}\n` +
-      `Время аренды: с ${startTime} до ${endTime}\n` +
-      `Адрес: ${address}`;
+      `Время аренды: с ${startTime} до ${endTime}\n\n` +
+      `📍 Адрес: ${address}`;
 
     await bot.sendMessage(process.env.ADMIN_CHAT_ID!, adminText);
 

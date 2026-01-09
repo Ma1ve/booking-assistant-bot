@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { Clock, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -10,10 +9,10 @@ interface UserMonthScheduleItemProps {
 
 export const UserMonthScheduleItem = ({ schedule }: UserMonthScheduleItemProps) => {
   return (
-    <Card className="relative w-full rounded-2xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl">
-      <CardContent className="relative text-white p-5 flex flex-col gap-4">
+    <Card className="py-5 relative w-full rounded-2xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl">
+      <CardContent className="relative text-white px-5 flex flex-col gap-4">
         <div className="flex justify-between items-center w-full">
-          <span className="font-semibold tracking-tight uppercase opacity-90 text-xl">
+          <span className="font-semibold tracking-tight uppercase opacity-90 bg-[#3d3d3d] rounded-lg px-3 py-1 text-sm">
             {schedule.date}
           </span>
         </div>

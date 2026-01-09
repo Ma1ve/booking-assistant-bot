@@ -1,17 +1,17 @@
 import { UserMonthScheduleItem } from "./UserMonthScheduleItem";
 import { UserScheduleItem } from "../types/userSchedules";
-
+import { Badge } from "@/components/ui/badge";
 interface UserMonthScheduleListProps {
   userScheduleList: UserScheduleItem[];
 }
 
 export const UserMonthScheduleList = ({ userScheduleList }: UserMonthScheduleListProps) => {
   return (
-    <div className="w-full h-[100dvh] relative">
+    <div className="w-full relative">
       <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/70 to-transparent pointer-events-none z-10" />
-      <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar firt:pt-10">
-        <div className="text-white text-center z-10 mt-10 mb-3 font-bold text-lg bg-black">
-          Ближайшие записи:
+      <div className="flex flex-col gap-7 overflow-y-auto no-scrollbar firt:pt-10">
+        <div className="flex justify-center">
+          <Badge className="mt-10 mb-3 text-md">Ближайшие записи:</Badge>
         </div>
 
         {userScheduleList.map((schedule) => (
@@ -20,8 +20,6 @@ export const UserMonthScheduleList = ({ userScheduleList }: UserMonthScheduleLis
           </div>
         ))}
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/70 to-transparent pointer-events-none z-10" />
     </div>
   );
 };

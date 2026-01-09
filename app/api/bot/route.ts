@@ -17,12 +17,23 @@ export async function POST(req: NextRequest) {
 
     console.log("Получено обновление от Telegram:", update);
 
-    if (update.message?.text !== "/start") {
+    if (update.message?.text !== "/start" || update.message?.text !== "/info") {
       return NextResponse.json({ ok: true });
     }
 
     const chatId = update.message.chat.id.toString();
     const username = update.message.chat.username ?? null;
+
+    if (update.message?.text == "/info") {
+      const infoText =
+        `✨ Добро пожаловать!\n\n` +
+        `Данный бот создан для более комфортной записи на приемы. \n\n` +
+        `С его помощью вы сможете просматривать ваши текущие записи, получать уведомления. \n\n` +
+        `Нажмите /start чтобы начать`;
+
+      await bot.sendMessage(process.env.ADMIN_CHAT_ID!, infoText);
+      return NextResponse.json({ ok: true });
+    }
 
     // const telegramAccount = await prisma.telegramAccount.upsert({
     //   where: { chatId },
@@ -88,7 +99,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    await bot.sendMessage(chatId, "Привет! Теперь я смогу присылать тебе уведомления 👌");
+    const startText =
+      `Готово! Теперь я на связи и смогу присылать вам уведомления 🔔\n\n` +
+      `📆 Ваше расписание и подробности встреч находятся в разделе "Ваши записи"`;
+
+    await bot.sendMessage(chatId, startText);
 
     return NextResponse.json({ ok: true });
   } catch (error) {
