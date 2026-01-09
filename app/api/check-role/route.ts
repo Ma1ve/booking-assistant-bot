@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validate, parse } from "@tma.js/init-data-node";
 
 const BOT_TOKEN = process.env.BOT_TOKEN!;
-const ADMIN_USERNAME = "malfeag";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME!;
 
 export async function POST(req: NextRequest) {
   try {
