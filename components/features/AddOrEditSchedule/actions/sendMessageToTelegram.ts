@@ -65,6 +65,7 @@ export async function sendMessageToTelegram({
       `📌 Вы записаны:\n` +
       `Дата: ${formatDate}\n` +
       `Время приема: с ${startTime} до ${endTime}\n\n` +
+      `* Указанный интервал может отличаться от фактического времени услуги. Мы закладываем время, чтобы вы могли спокойно прийти и уйти без спешки, хотя сам прием может длиться от 1 часа. \n\n` +
       `📍 Адрес: ${address}`;
 
     await bot.sendMessage(telegramAccount.chatId, userText);

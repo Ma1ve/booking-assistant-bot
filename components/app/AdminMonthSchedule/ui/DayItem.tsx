@@ -6,19 +6,21 @@ import { IDaySchedule } from "../types/IDaySchedule";
 
 interface DayItemProps {
   day: IDaySchedule;
+  zIndex: number;
   onClick: () => void;
 }
 
-export const DayItem = ({ day, onClick }: DayItemProps) => {
+export const DayItem = ({ day, zIndex, onClick }: DayItemProps) => {
   const { currDay, isToday, isPast, isWeekend } = getDayFlags({ date: day.date });
 
   return (
     <div
       onClick={onClick}
       className={cn(
-        "z-20 relative isolate h-11 w-11 rounded flex items-center justify-center text-white cursor-pointer backdrop-blur-md border border-white/15 shadow-lg",
+        `relative isolate h-11 w-11 rounded flex items-center justify-center text-white cursor-pointer backdrop-blur-md border border-white/15 shadow-lg`,
         getDayClasses({ isToday, isWeekend, isPast })
       )}
+      style={{ zIndex }}
     >
       {currDay}
       {day.userCount > 0 && (

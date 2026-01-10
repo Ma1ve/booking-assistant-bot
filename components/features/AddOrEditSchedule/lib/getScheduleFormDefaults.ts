@@ -7,7 +7,7 @@ export function getScheduleFormDefaults(defaultValues?: Partial<TUserForm> | nul
     telegram: "",
     startTime: "",
     endTime: "",
-    address: "",
+    address: "Пятницкая улица, 2/38с3",
     ...(defaultValues ?? {}),
   };
 }

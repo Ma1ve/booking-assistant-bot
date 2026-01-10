@@ -99,7 +99,7 @@ const schema = createSchema<GraphQLContext>({
         try {
           const now = DateTime.now().setZone(TIME_ZONE);
 
-          const startOfHour = now.toJSDate();
+          const startOfToday = now.startOf("day").toJSDate();
           const endOfMonth = now.endOf("month").toJSDate();
 
           const allSchedules = await ctx.prisma.dayScheduleUser.findMany({
@@ -115,7 +115,7 @@ const schema = createSchema<GraphQLContext>({
               },
               daySchedule: {
                 date: {
-                  gte: startOfHour,
+                  gte: startOfToday,
                   lte: endOfMonth,
                 },
               },
@@ -135,7 +135,27 @@ const schema = createSchema<GraphQLContext>({
             orderBy: [{ daySchedule: { date: "asc" } }, { user: { startTime: "asc" } }],
           });
 
-          return allSchedules;
+          const filteredSchedules = allSchedules.filter((item) => {
+            const now = DateTime.now().setZone(TIME_ZONE);
+
+            const scheduleDate = DateTime.fromJSDate(item.daySchedule.date)
+              .setZone(TIME_ZONE)
+              .startOf("day");
+
+            const scheduleEnd = DateTime.fromJSDate(item.user.endTime).setZone(TIME_ZONE);
+
+            if (scheduleDate > now.startOf("day")) {
+              return true;
+            }
+
+            if (scheduleDate.hasSame(now, "day")) {
+              return scheduleEnd > now;
+            }
+
+            return false;
+          });
+
+          return filteredSchedules;
         } catch (error) {
           console.error("usersByDay error:", error);
           throw new Error("Failed to load users by day");

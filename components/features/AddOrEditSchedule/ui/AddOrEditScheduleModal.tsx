@@ -27,6 +27,7 @@ import { getScheduleFormDefaults } from "../lib/getScheduleFormDefaults";
 import { notifyUserAndCloseModal } from "../lib/notifyUserAndCloseModal";
 import { mapScheduleInfo } from "../lib/mapScheduleInfo";
 import { getDialogText } from "../lib/formText";
+import { addTwoHours } from "../lib/addTwoHours";
 
 import { AddOrEditScheduleLoader } from "./AddOrEditScheduleLoader";
 
@@ -46,6 +47,7 @@ export function AddOrEditScheduleModal(props: AddOrEditScheduleModalProps) {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<TUserForm>({
     resolver: zodResolver(addUserSchema),
@@ -159,6 +161,11 @@ export function AddOrEditScheduleModal(props: AddOrEditScheduleModalProps) {
                   }
 
                   e.target.value = val;
+
+                  if (val.length === 5) {
+                    const newEndTime = addTwoHours(val);
+                    setValue("endTime", newEndTime);
+                  }
                 },
               }}
             />

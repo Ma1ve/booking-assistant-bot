@@ -81,6 +81,9 @@ export async function POST(req: NextRequest) {
 
     await bot.sendMessage(chatId, startText);
 
+    const adminText = `Оповещения для @${username} включены`;
+    await bot.sendMessage(process.env.ADMIN_CHAT_ID!, adminText);
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Ошибка Webhook:", error);
