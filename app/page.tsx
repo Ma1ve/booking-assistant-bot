@@ -45,9 +45,22 @@ export default async function Home() {
     userCount: day.users.length,
   }));
 
+  const firstDayInMonth = DateTime.fromJSDate(days[0].date);
+  const firstDayOfWeek = firstDayInMonth.weekday;
+
+  const placeholdersCount = firstDayOfWeek - 1;
+
+  const placeholders = Array.from({ length: placeholdersCount }, (_, i) => ({
+    sheduleId: -i - 1,
+    date: null,
+    userCount: 0,
+  }));
+
+  const currDays = [...placeholders, ...daysWithUserCount];
+
   return (
     <TelegramAuthGate>
-      <RoleView days={daysWithUserCount} />
+      <RoleView days={currDays} />
     </TelegramAuthGate>
   );
 }

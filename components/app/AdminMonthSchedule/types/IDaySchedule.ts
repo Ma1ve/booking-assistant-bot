@@ -1,5 +1,5 @@
 export interface IDaySchedule {
   sheduleId: number;
-  date: Date;
+  date: Date | null;
   userCount: number;
 }

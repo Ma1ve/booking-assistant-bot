@@ -7,6 +7,10 @@ export function getTodaySchedule(days: IDaySchedule[]) {
   const today = DateTime.now().setZone(TIME_ZONE);
 
   return (
-    days.find((el) => DateTime.fromJSDate(el.date).setZone(TIME_ZONE).hasSame(today, "day")) ?? null
+    days.find((el) =>
+      DateTime.fromJSDate(el.date as Date)
+        .setZone(TIME_ZONE)
+        .hasSame(today, "day")
+    ) ?? null
   );
 }
