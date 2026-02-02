@@ -17,7 +17,7 @@ import { getIsAppointmentNow } from "../../lib/getIsAppointmentNow";
 import { TUserForm } from "@/components/features/AddOrEditSchedule";
 
 interface TimeScheduleItemProps extends TUserForm {
-  date: Date | undefined;
+  date: Date | undefined | null;
   mode?: ScheduleMode;
   setActiveSchedule?: Dispatch<SetStateAction<TUserForm | null>>;
 }
@@ -84,7 +84,7 @@ export const TimeScheduleItem = ({
 
   const classNameBadge = isLessCurrEndTime
     ? badgeClassByMode["default"]
-    : badgeClassByMode[mode] ?? badgeClassByMode["default"];
+    : (badgeClassByMode[mode] ?? badgeClassByMode["default"]);
 
   return (
     <Item
@@ -95,7 +95,7 @@ export const TimeScheduleItem = ({
       className={cn(
         "bg-black",
         isLessCurrEndTime && "filter contrast-50",
-        isAppointmentNow && "ring-2 ring-green-900"
+        isAppointmentNow && "ring-2 ring-green-900",
       )}
     >
       <div>

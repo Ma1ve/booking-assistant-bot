@@ -69,7 +69,7 @@ export const TimeSchedule = ({ selectedDay }: TimeSchedulelProps) => {
 
       {isShowDeleteModal && (
         <ConfirmDeleteModal
-          date={selectedDay.date.toISOString()}
+          date={(selectedDay.date as Date).toISOString()}
           isOpen={true}
           activeSchedule={activeSchedule}
           onClose={handleCloseModal}
@@ -81,7 +81,7 @@ export const TimeSchedule = ({ selectedDay }: TimeSchedulelProps) => {
           isOpen={isOpen}
           isAdd={isAddMode}
           scheduleId={selectedDay.sheduleId}
-          date={selectedDay.date.toISOString()}
+          date={(selectedDay.date as Date).toISOString()}
           onClose={handleCloseModal}
           defaultValues={activeSchedule}
         />
@@ -92,7 +92,7 @@ export const TimeSchedule = ({ selectedDay }: TimeSchedulelProps) => {
           isOpen={isOpen}
           isAdd={isAddMode}
           scheduleId={selectedDay.sheduleId}
-          date={selectedDay.date.toISOString()}
+          date={(selectedDay.date as Date).toISOString()}
           onClose={handleCloseModal}
         />
       )}

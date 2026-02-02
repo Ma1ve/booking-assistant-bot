@@ -2,7 +2,7 @@ import { TIME_ZONE } from "@/components/shared/consts/timeZone";
 import { DateTime } from "luxon";
 
 interface LessCurrDayArgs {
-  currDate?: Date;
+  currDate?: Date | null;
 }
 
 export const getIsLessCurrDay = ({ currDate }: LessCurrDayArgs) => {

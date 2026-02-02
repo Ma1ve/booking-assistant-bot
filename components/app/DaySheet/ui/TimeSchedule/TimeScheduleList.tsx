@@ -8,7 +8,7 @@ import { TimeScheduleItem } from "./TimeScheduleItem";
 import { TUserForm } from "@/components/features/AddOrEditSchedule";
 
 interface TimeScheduleListProps {
-  date?: Date;
+  date?: Date | null;
   scheduleList: TUserForm[];
   mode: ScheduleMode;
   setMode: Dispatch<SetStateAction<ScheduleMode>>;

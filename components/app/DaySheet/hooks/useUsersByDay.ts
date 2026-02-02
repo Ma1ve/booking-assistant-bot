@@ -16,7 +16,7 @@ interface UsersByDayProps {
 
 export function useUsersByDay({ selectedDay }: UsersByDayProps) {
   const { data, loading, error } = useQuery<UsersByDayResponse>(GET_USER_BY_DAY, {
-    variables: selectedDay ? { date: selectedDay.date.toISOString() } : undefined,
+    variables: selectedDay ? { date: (selectedDay.date as Date).toISOString() } : undefined,
     skip: !selectedDay,
   });
 

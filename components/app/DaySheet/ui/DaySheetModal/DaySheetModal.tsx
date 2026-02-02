@@ -32,14 +32,14 @@ export const DaySheetModal = memo(function DaySheetModal({
       <SheetContent side="bottom" className="w-full h-full p-3 bg-black/10 backdrop-blur-md ">
         <SheetHeader>
           <SheetTitle className="text-center text-xl font-bold">
-            {selectedDay ? getSheetTitle(selectedDay.date) : ""}
+            {selectedDay ? getSheetTitle(selectedDay.date as Date) : ""}
           </SheetTitle>
           <SheetDescription className="sr-only">
             Модальное окно с расписанием на выбранный день
           </SheetDescription>
         </SheetHeader>
 
-        <TimeSchedule selectedDay={selectedDay} />
+        <TimeSchedule selectedDay={selectedDay as IDaySchedule} />
       </SheetContent>
     </Sheet>
   );

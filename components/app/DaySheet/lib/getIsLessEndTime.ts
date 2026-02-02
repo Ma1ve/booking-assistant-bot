@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { TIME_ZONE } from "@/components/shared/consts/timeZone";
 
 interface LessEndTimeArgs {
-  date: Date | undefined;
+  date: Date | undefined | null;
   endTime: string;
 }
 
