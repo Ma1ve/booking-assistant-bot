@@ -45,7 +45,7 @@ export default async function Home() {
     userCount: day.users.length,
   }));
 
-  const firstDayInMonth = DateTime.fromJSDate(days[0].date);
+  const firstDayInMonth = DateTime.fromJSDate(days[0].date).setZone(TIME_ZONE);
   const firstDayOfWeek = firstDayInMonth.weekday;
 
   const placeholdersCount = firstDayOfWeek - 1;
