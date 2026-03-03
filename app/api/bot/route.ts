@@ -59,13 +59,10 @@ export async function POST(req: NextRequest) {
       }
 
       // Привязываем существующие записи User к этому Person
-      const user = await prisma.user.findFirst({
+      await prisma.user.updateMany({
         where: { person: { telegram: { username } } },
+        data: { personId },
       });
-
-      if (user) {
-        await prisma.user.update({ where: { id: user.id }, data: { personId } });
-      }
     }
 
     const startText =
