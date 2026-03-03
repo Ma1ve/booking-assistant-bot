@@ -28,7 +28,7 @@ export function AdminMonthSchedule({ months }: AdminMonthScheduleProps) {
 
   return (
     <div className="flex justify-center h-full px-3.75">
-      <div>
+      <div className="w-full">
         <NearesetEntryDay handleOpenTodaySchedule={handleOpenTodaySchedule} />
 
         <MonthSwitcher

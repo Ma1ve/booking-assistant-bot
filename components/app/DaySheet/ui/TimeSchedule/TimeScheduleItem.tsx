@@ -77,14 +77,15 @@ export const TimeScheduleItem = ({
   const isAppointmentNow = getIsAppointmentNow({ date, startTime, endTime });
 
   const getBadgeText = () => {
-    if (isLessCurrEndTime) return `${startTime} - ${endTime}`;
+    if (isLessCurrEndTime && mode !== "delete") return `${startTime} - ${endTime}`;
 
     return badgeTextByMode[mode]?.title ?? `${startTime} - ${endTime}`;
   };
 
-  const classNameBadge = isLessCurrEndTime
-    ? badgeClassByMode["default"]
-    : (badgeClassByMode[mode] ?? badgeClassByMode["default"]);
+  const classNameBadge =
+    isLessCurrEndTime && mode !== "delete"
+      ? badgeClassByMode["default"]
+      : (badgeClassByMode[mode] ?? badgeClassByMode["default"]);
 
   return (
     <Item
@@ -94,7 +95,7 @@ export const TimeScheduleItem = ({
       role="listitem"
       className={cn(
         "bg-black",
-        isLessCurrEndTime && "filter contrast-50",
+        isLessCurrEndTime && mode !== "delete" && "filter contrast-50",
         isAppointmentNow && "ring-2 ring-green-900",
       )}
     >
@@ -116,7 +117,7 @@ export const TimeScheduleItem = ({
               onClick={(e) => {
                 e.stopPropagation();
 
-                if (isLessCurrEndTime) return;
+                if (isLessCurrEndTime && mode !== "delete") return;
 
                 badgeTextByMode[mode]?.handler();
               }}

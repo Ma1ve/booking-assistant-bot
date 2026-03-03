@@ -16,11 +16,11 @@ export const DayItem = ({ day, zIndex, onClick }: DayItemProps) => {
   return (
     <div
       onClick={onClick}
+      style={{ zIndex }}
       className={cn(
-        `relative isolate h-11 w-11 rounded flex items-center justify-center text-white cursor-pointer backdrop-blur-md border border-white/15 shadow-lg`,
+        `relative w-full aspect-square rounded flex items-center justify-center text-white cursor-pointer backdrop-blur-md border border-white/15 shadow-lg`,
         getDayClasses({ isToday, isWeekend, isPast })
       )}
-      style={{ zIndex }}
     >
       {currDay}
       {day.userCount > 0 && (

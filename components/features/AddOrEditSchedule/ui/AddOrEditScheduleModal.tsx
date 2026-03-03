@@ -203,11 +203,11 @@ export function AddOrEditScheduleModal(props: AddOrEditScheduleModalProps) {
           />
 
           <DialogFooter className="mt-7 flex-col gap-3">
-            <Button variant="outline" onClick={onClose}>
-              Закрыть
-            </Button>
             <Button disabled={isDisabledBtn} type="submit" className="text-white bg-green-700">
               {btnText}
+            </Button>
+            <Button variant="outline" onClick={onClose}>
+              Закрыть
             </Button>
           </DialogFooter>
         </form>

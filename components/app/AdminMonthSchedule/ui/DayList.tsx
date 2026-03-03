@@ -15,7 +15,7 @@ export const DayList = ({ days, onSelectDay }: DayListProps) => {
   };
 
   return (
-    <div className="p-2.5 grid grid-cols-7 gap-3 gap-y-7 mt-7 border-2 border-green-900 rounded-[10px] overflow-visible">
+    <div className="p-2.5 grid grid-cols-7 gap-x-2 gap-y-4 mt-5 border-2 border-green-900 rounded-[10px] overflow-visible">
       {days.map((day, idx) => (
         <DayItem
           key={day.date ? day.date.toISOString() : `placeholder-${idx}`}
