@@ -7,33 +7,17 @@ datasource db {
   provider = "postgresql"
 }
 
-model DaySchedule {
-  id    Int               @id @default(autoincrement())
-  date  DateTime
-  users DayScheduleUser[]
-}
-
-model DayScheduleUser {
-  userId        Int
-  dayScheduleId Int
-  user          User        @relation(fields: [userId], references: [id])
-  daySchedule   DaySchedule @relation(fields: [dayScheduleId], references: [id])
-
-  @@id([userId, dayScheduleId])
-}
-
 model User {
   id        Int      @id @default(autoincrement())
   firstName String
   lastName  String
+  date      DateTime
   startTime DateTime
   endTime   DateTime
   address   String
 
   personId Int?
   person   Person? @relation(fields: [personId], references: [id])
-
-  schedules DayScheduleUser[]
 }
 
 model Person {

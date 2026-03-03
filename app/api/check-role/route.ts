@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { validate, parse } from "@tma.js/init-data-node";
 
 const BOT_TOKEN = process.env.BOT_TOKEN!;
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME!;
+const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES ?? "")
+  .split(",")
+  .map((u) => u.trim())
+  .filter(Boolean);
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
     const parsed = parse(initData);
 
-    const isAdmin = parsed.user?.username === ADMIN_USERNAME;
+    const isAdmin = !!parsed.user?.username && ADMIN_USERNAMES.includes(parsed.user.username);
 
     return NextResponse.json({ ok: true, isAdmin, user: parsed.user });
   } catch (error) {

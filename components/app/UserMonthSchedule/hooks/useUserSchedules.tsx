@@ -4,9 +4,9 @@ import { useQuery } from "@apollo/client/react";
 import { GET_ALL_USER_SCHEDULES } from "../graphql/queries/getAllUserSchedules";
 
 import {
-  DayScheduleUserGQL,
   GetAllUserSchedulesQuery,
   GetAllUserSchedulesVariables,
+  UserScheduleGQL,
   UserScheduleItem,
 } from "../types/userSchedules";
 
@@ -19,16 +19,16 @@ export function useUserSchedules(chatId: string) {
   );
 
   const schedules: UserScheduleItem[] =
-    data?.getAllUserSchedules?.map((item: DayScheduleUserGQL, index: number) => ({
+    data?.getAllUserSchedules?.map((item: UserScheduleGQL, index: number) => ({
       id: index + 1,
-      date: DateTime.fromMillis(Number(item.daySchedule.date))
+      date: DateTime.fromISO(item.date)
         .setZone("Europe/Moscow")
         .setLocale("ru")
         .toFormat("dd MMMM yyyy"),
-      startTime: item.user.startTime,
-      endTime: item.user.endTime,
-      address: item.user.address,
-      telegram: item.user.telegram ?? null,
+      startTime: item.startTime,
+      endTime: item.endTime,
+      address: item.address,
+      telegram: item.telegram ?? null,
     })) ?? [];
 
   return {

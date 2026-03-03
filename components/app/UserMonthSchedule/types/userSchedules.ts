@@ -1,17 +1,14 @@
-export interface DayScheduleUserGQL {
-  daySchedule: {
-    date: string;
-  };
-  user: {
-    startTime: string;
-    endTime: string;
-    address: string;
-    telegram: string | null;
-  };
+export interface UserScheduleGQL {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  address: string;
+  telegram: string | null;
 }
 
 export interface GetAllUserSchedulesQuery {
-  getAllUserSchedules: DayScheduleUserGQL[];
+  getAllUserSchedules: UserScheduleGQL[];
 }
 
 export interface GetAllUserSchedulesVariables {

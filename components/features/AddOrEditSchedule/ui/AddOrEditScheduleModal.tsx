@@ -34,14 +34,13 @@ import { AddOrEditScheduleLoader } from "./AddOrEditScheduleLoader";
 interface AddOrEditScheduleModalProps {
   date: string;
   isOpen: boolean;
-  scheduleId: number;
   isAdd: boolean;
   defaultValues?: Partial<TUserForm> | null;
   onClose: () => void;
 }
 
 export function AddOrEditScheduleModal(props: AddOrEditScheduleModalProps) {
-  const { date, isOpen, isAdd, scheduleId, defaultValues, onClose } = props;
+  const { date, isOpen, isAdd, defaultValues, onClose } = props;
 
   const {
     register,
@@ -58,7 +57,7 @@ export function AddOrEditScheduleModal(props: AddOrEditScheduleModalProps) {
   const watchedFields = watch();
   const isDisabledBtn = getIsDisabledBtn({ isAdd, watchedFields });
 
-  const { create, update, loading } = useScheduleMutations({ date, scheduleId });
+  const { create, update, loading } = useScheduleMutations({ date });
 
   const onSubmit = async (formData: TUserForm) => {
     const inputUser = mapFormToScheduleInput({ formData, date });

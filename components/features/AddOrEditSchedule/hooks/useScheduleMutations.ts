@@ -5,16 +5,15 @@ import { TUserForm } from "../lib/addUserSchema";
 
 interface ScheduleMutationsArgs {
   date: string;
-  scheduleId: number;
 }
 
-export const useScheduleMutations = ({ date, scheduleId }: ScheduleMutationsArgs) => {
+export const useScheduleMutations = ({ date }: ScheduleMutationsArgs) => {
   const [createScheduleMutation, { loading: loadingCreate }] = useCreateSchedule(date);
   const [updateScheduleMutation, { loading: loadingUpdate }] = useUpdateSchedule(date);
 
   const create = async ({ input }: { input: TUserForm }) => {
     const { data } = await createScheduleMutation({
-      variables: { scheduleId, input },
+      variables: { input },
     });
 
     const id = Number(data?.createSchedule?.id);
@@ -25,7 +24,7 @@ export const useScheduleMutations = ({ date, scheduleId }: ScheduleMutationsArgs
 
   const update = async ({ userId, input }: { userId: number; input: TUserForm }) => {
     await updateScheduleMutation({
-      variables: { scheduleId, userId, input },
+      variables: { userId, input },
     });
 
     return userId;

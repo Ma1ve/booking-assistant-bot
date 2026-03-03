@@ -51,6 +51,8 @@ export const TimeSchedule = ({ selectedDay }: TimeSchedulelProps) => {
   const isShowEditModal = selectedDay && isEditMode && activeSchedule;
   const isShowDeleteModal = selectedDay && isDeleteMode && activeSchedule;
 
+  const date = selectedDay?.date ? (selectedDay.date as Date).toISOString() : "";
+
   return (
     <div>
       {isEmptyScheduleList ? (
@@ -69,7 +71,7 @@ export const TimeSchedule = ({ selectedDay }: TimeSchedulelProps) => {
 
       {isShowDeleteModal && (
         <ConfirmDeleteModal
-          date={(selectedDay.date as Date).toISOString()}
+          date={date}
           isOpen={true}
           activeSchedule={activeSchedule}
           onClose={handleCloseModal}
@@ -80,8 +82,7 @@ export const TimeSchedule = ({ selectedDay }: TimeSchedulelProps) => {
         <AddOrEditScheduleModal
           isOpen={isOpen}
           isAdd={isAddMode}
-          scheduleId={selectedDay.sheduleId}
-          date={(selectedDay.date as Date).toISOString()}
+          date={date}
           onClose={handleCloseModal}
           defaultValues={activeSchedule}
         />
@@ -91,8 +92,7 @@ export const TimeSchedule = ({ selectedDay }: TimeSchedulelProps) => {
         <AddOrEditScheduleModal
           isOpen={isOpen}
           isAdd={isAddMode}
-          scheduleId={selectedDay.sheduleId}
-          date={(selectedDay.date as Date).toISOString()}
+          date={date}
           onClose={handleCloseModal}
         />
       )}

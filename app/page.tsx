@@ -4,63 +4,66 @@ import { prisma } from "@/lib/prisma";
 import { RoleView } from "@/components/app/RoleView/ui/RoleView";
 import { TIME_ZONE } from "@/components/shared/consts/timeZone";
 import { TelegramAuthGate } from "@/components/providers/TelegramAuthGate";
+import { IDaySchedule, MonthData } from "@/components/app/AdminMonthSchedule";
 
-export default async function Home() {
-  const now = DateTime.now().setZone(TIME_ZONE);
+function buildMonthDays(monthStart: DateTime, countByDate: Map<string, number>): IDaySchedule[] {
+  const daysInMonth = monthStart.daysInMonth!;
+  const firstDayOfWeek = monthStart.weekday;
 
-  const startOfMonth = now.startOf("month");
-  const endOfMonth = now.endOf("month");
-
-  let days = await prisma.daySchedule.findMany({
-    where: { date: { gte: startOfMonth.toJSDate(), lte: endOfMonth.toJSDate() } },
-    orderBy: { date: "asc" },
-    include: { users: true },
-  });
-
-  if (days.length === 0) {
-    if (!now.isValid || !startOfMonth.isValid) {
-      throw new Error("Не удалось рассчитать даты для расписания");
-    }
-
-    await prisma.dayScheduleUser.deleteMany();
-    await prisma.daySchedule.deleteMany();
-
-    const daysInMonth = now.daysInMonth;
-    const newDays = Array.from({ length: daysInMonth }, (_, i) => ({
-      date: startOfMonth.plus({ days: i }).toJSDate(),
-    }));
-
-    await prisma.daySchedule.createMany({ data: newDays });
-
-    days = await prisma.daySchedule.findMany({
-      where: { date: { gte: startOfMonth.toJSDate(), lte: endOfMonth.toJSDate() } },
-      orderBy: { date: "asc" },
-      include: { users: true },
-    });
-  }
-
-  const daysWithUserCount = days.map((day) => ({
-    sheduleId: day.id,
-    date: day.date,
-    userCount: day.users.length,
-  }));
-
-  const firstDayInMonth = DateTime.fromJSDate(days[0].date).setZone(TIME_ZONE);
-  const firstDayOfWeek = firstDayInMonth.weekday;
-
-  const placeholdersCount = firstDayOfWeek - 1;
-
-  const placeholders = Array.from({ length: placeholdersCount }, (_, i) => ({
-    sheduleId: -i - 1,
+  const placeholders: IDaySchedule[] = Array.from({ length: firstDayOfWeek - 1 }, () => ({
     date: null,
     userCount: 0,
   }));
 
-  const currDays = [...placeholders, ...daysWithUserCount];
+  const days: IDaySchedule[] = Array.from({ length: daysInMonth }, (_, i) => {
+    const day = monthStart.plus({ days: i });
+    return {
+      date: day.toJSDate(),
+      userCount: countByDate.get(day.toISODate()!) ?? 0,
+    };
+  });
+
+  return [...placeholders, ...days];
+}
+
+export default async function Home() {
+  const now = DateTime.now().setZone(TIME_ZONE);
+  const currentMonthStart = now.startOf("month");
+  const nextMonthStart = currentMonthStart.plus({ months: 1 });
+  const nextMonthEnd = nextMonthStart.endOf("month");
+
+  const appointments = await prisma.user.groupBy({
+    by: ["date"],
+    where: {
+      date: {
+        gte: currentMonthStart.toJSDate(),
+        lte: nextMonthEnd.toJSDate(),
+      },
+    },
+    _count: { id: true },
+  });
+
+  const countByDate = new Map(
+    appointments.map((a) => [
+      DateTime.fromJSDate(a.date).setZone(TIME_ZONE).startOf("day").toISODate()!,
+      a._count.id,
+    ])
+  );
+
+  const months: MonthData[] = [
+    {
+      label: currentMonthStart.setLocale("ru").toFormat("LLLL yyyy"),
+      days: buildMonthDays(currentMonthStart, countByDate),
+    },
+    {
+      label: nextMonthStart.setLocale("ru").toFormat("LLLL yyyy"),
+      days: buildMonthDays(nextMonthStart, countByDate),
+    },
+  ];
 
   return (
     <TelegramAuthGate>
-      <RoleView days={currDays} />
+      <RoleView months={months} />
     </TelegramAuthGate>
   );
 }

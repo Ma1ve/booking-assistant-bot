@@ -13,17 +13,17 @@ const schema = createSchema<GraphQLContext>({
     id: ID!
     firstName: String!
     lastName: String!
+    date: String!
     startTime: String!
     endTime: String!
     address: String!
     person: Person
     telegram: String
-    schedules: [DayScheduleUser!]!
   }
 
   type Person {
     id: ID!
-    telegramAccount: TelegramAccount
+    telegram: TelegramAccount
     users: [User!]!
   }
 
@@ -31,20 +31,6 @@ const schema = createSchema<GraphQLContext>({
     id: ID!
     chatId: String!
     username: String
-  }
-
-  type DaySchedule {
-    id: ID!
-    date: String!
-    users: [DayScheduleUser!]!
-    userCount: Int!
-  }
-
-  type DayScheduleUser {
-    userId: ID!
-    dayScheduleId: ID!
-    user: User!
-    daySchedule: DaySchedule!
   }
 
   type UserWithTotalScheduleRecords {
@@ -64,7 +50,7 @@ const schema = createSchema<GraphQLContext>({
   type Query {
     usersByDay(date: String!): [User!]!
     todayClosestSchedule: UserWithTotalScheduleRecords
-    getAllUserSchedules(chatId: String!): [DayScheduleUser!]!
+    getAllUserSchedules(chatId: String!): [User!]!
   }
 
   type Mutation {
@@ -74,7 +60,6 @@ const schema = createSchema<GraphQLContext>({
     ): User!
 
     createSchedule(
-      scheduleId: Int!
       input: UserInput!
     ): User!
 
@@ -98,131 +83,76 @@ const schema = createSchema<GraphQLContext>({
       getAllUserSchedules: async (_parent, { chatId }, ctx) => {
         try {
           const now = DateTime.now().setZone(TIME_ZONE);
-
+          const nowJSDate = now.toJSDate();
           const startOfToday = now.startOf("day").toJSDate();
+          const endOfToday = now.endOf("day").toJSDate();
           const endOfMonth = now.endOf("month").toJSDate();
 
-          const allSchedules = await ctx.prisma.dayScheduleUser.findMany({
+          return await ctx.prisma.user.findMany({
             where: {
-              user: {
-                person: {
-                  telegram: {
-                    is: {
-                      chatId: String(chatId),
-                    },
-                  },
+              person: {
+                telegram: {
+                  is: { chatId: String(chatId) },
                 },
               },
-              daySchedule: {
-                date: {
-                  gte: startOfToday,
-                  lte: endOfMonth,
+              OR: [
+                {
+                  date: { gt: endOfToday, lte: endOfMonth },
                 },
-              },
+                {
+                  date: { gte: startOfToday, lte: endOfToday },
+                  endTime: { gt: nowJSDate },
+                },
+              ],
             },
             include: {
-              user: {
-                include: {
-                  person: {
-                    include: {
-                      telegram: true,
-                    },
-                  },
-                },
-              },
-              daySchedule: true,
+              person: { include: { telegram: true } },
             },
-            orderBy: [{ daySchedule: { date: "asc" } }, { user: { startTime: "asc" } }],
+            orderBy: [{ date: "asc" }, { startTime: "asc" }],
           });
-
-          const filteredSchedules = allSchedules.filter((item) => {
-            const now = DateTime.now().setZone(TIME_ZONE);
-
-            const scheduleDate = DateTime.fromJSDate(item.daySchedule.date)
-              .setZone(TIME_ZONE)
-              .startOf("day");
-
-            const scheduleEnd = DateTime.fromJSDate(item.user.endTime).setZone(TIME_ZONE);
-
-            if (scheduleDate > now.startOf("day")) {
-              return true;
-            }
-
-            if (scheduleDate.hasSame(now, "day")) {
-              return scheduleEnd > now;
-            }
-
-            return false;
-          });
-
-          return filteredSchedules;
         } catch (error) {
-          console.error("usersByDay error:", error);
-          throw new Error("Failed to load users by day");
+          console.error("getAllUserSchedules error:", error);
+          throw new Error("Failed to load user schedules");
         }
       },
+
       usersByDay: async (_parent, { date }, ctx) => {
-        const searchDate = DateTime.fromISO(date).setZone(TIME_ZONE).startOf("day").toJSDate();
+        const startDate = DateTime.fromISO(date).setZone(TIME_ZONE).startOf("day").toJSDate();
+        const endDate = DateTime.fromISO(date).setZone(TIME_ZONE).endOf("day").toJSDate();
 
         try {
-          const day = await ctx.prisma.daySchedule.findFirst({
-            where: { date: searchDate },
-
-            include: {
-              users: {
-                include: {
-                  user: {
-                    include: { person: { include: { telegram: true } } },
-                  },
-                },
-              },
+          return await ctx.prisma.user.findMany({
+            where: {
+              date: { gte: startDate, lte: endDate },
             },
+            include: {
+              person: { include: { telegram: true } },
+            },
+            orderBy: { startTime: "asc" },
           });
-
-          const users =
-            day?.users
-              .map((dsu) => dsu.user)
-              .sort((a, b) => {
-                const aTime = DateTime.fromJSDate(a.startTime).setZone(TIME_ZONE).valueOf();
-                const bTime = DateTime.fromJSDate(b.startTime).setZone(TIME_ZONE).valueOf();
-
-                return aTime - bTime;
-              }) ?? [];
-
-          return users;
         } catch (error) {
           console.error("usersByDay error:", error);
           throw new Error("Failed to load users by day");
         }
       },
+
       todayClosestSchedule: async (_parent, _args, ctx) => {
         try {
           const now = DateTime.now().setZone(TIME_ZONE);
           const nowJSDate = now.toJSDate();
-
           const startOfDay = now.startOf("day").toJSDate();
           const endOfDay = now.endOf("day").toJSDate();
 
-          const todaySchedule = await ctx.prisma.daySchedule.findFirst({
+          const users = await ctx.prisma.user.findMany({
             where: {
-              date: {
-                gte: startOfDay,
-                lte: endOfDay,
-              },
+              date: { gte: startOfDay, lte: endOfDay },
             },
-            include: {
-              users: {
-                include: { user: true },
-                orderBy: { user: { startTime: "asc" } },
-              },
-            },
+            orderBy: { startTime: "asc" },
           });
-          if (!todaySchedule) return null;
 
-          const users = todaySchedule.users.map((dsu) => dsu.user);
+          if (users.length === 0) return null;
 
           const totalScheduleRecords = users.length;
-
           const pastScheduleRecords = users.filter((u) => u.endTime < nowJSDate).length;
 
           const current =
@@ -238,13 +168,15 @@ const schema = createSchema<GraphQLContext>({
             pastScheduleRecords: String(pastScheduleRecords),
           };
         } catch (error) {
-          console.error("usersByDay error:", error);
-          throw new Error("Failed to load users by day");
+          console.error("todayClosestSchedule error:", error);
+          throw new Error("Failed to load today schedule");
         }
       },
     },
 
     User: {
+      date: (parent) =>
+        DateTime.fromJSDate(parent.date).setZone(TIME_ZONE).startOf("day").toISO()!,
       startTime: (parent) => getFormatTime(parent.startTime),
       endTime: (parent) => getFormatTime(parent.endTime),
 
@@ -260,21 +192,19 @@ const schema = createSchema<GraphQLContext>({
     },
 
     Mutation: {
-      createSchedule: async (_parent, { scheduleId, input }, ctx) => {
+      createSchedule: async (_parent, { input }, ctx) => {
         try {
-          const { startTime, endTime } = parseAndValidateTime(
+          const { startTime, endTime, date } = parseAndValidateTime(
             input.startTime,
             input.endTime,
             input.date
           );
 
-          const conflict = await ctx.prisma.dayScheduleUser.findFirst({
+          const conflict = await ctx.prisma.user.findFirst({
             where: {
-              dayScheduleId: scheduleId,
-              user: {
-                startTime: { lt: endTime },
-                endTime: { gt: startTime },
-              },
+              date,
+              startTime: { lt: endTime },
+              endTime: { gt: startTime },
             },
           });
 
@@ -288,6 +218,7 @@ const schema = createSchema<GraphQLContext>({
             data: {
               firstName: input.firstName,
               lastName: input.lastName,
+              date,
               startTime,
               endTime,
               address: input.address,
@@ -314,9 +245,7 @@ const schema = createSchema<GraphQLContext>({
                 personId = telegramAccount.personId;
               }
             } else {
-              const person = await ctx.prisma.person.create({
-                data: {},
-              });
+              const person = await ctx.prisma.person.create({ data: {} });
               personId = person.id;
 
               telegramAccount = await ctx.prisma.telegramAccount.create({
@@ -333,13 +262,6 @@ const schema = createSchema<GraphQLContext>({
             });
           }
 
-          await ctx.prisma.dayScheduleUser.create({
-            data: {
-              userId: user.id,
-              dayScheduleId: scheduleId,
-            },
-          });
-
           return user;
         } catch (error) {
           console.error("createSchedule error:", error);
@@ -348,29 +270,26 @@ const schema = createSchema<GraphQLContext>({
             throw error;
           }
 
-          throw new GraphQLError("Ошибка при обновлении записи", {
+          throw new GraphQLError("Ошибка при создании записи", {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
           });
         }
       },
-      updateSchedule: async (_parent, { userId, scheduleId, input }, ctx) => {
+
+      updateSchedule: async (_parent, { userId, input }, ctx) => {
         try {
-          const { startTime, endTime } = parseAndValidateTime(
+          const { startTime, endTime, date } = parseAndValidateTime(
             input.startTime,
             input.endTime,
             input.date
           );
 
-          const conflict = await ctx.prisma.dayScheduleUser.findFirst({
+          const conflict = await ctx.prisma.user.findFirst({
             where: {
-              dayScheduleId: scheduleId,
-              NOT: {
-                userId: userId,
-              },
-              user: {
-                startTime: { lt: endTime },
-                endTime: { gt: startTime },
-              },
+              date,
+              NOT: { id: userId },
+              startTime: { lt: endTime },
+              endTime: { gt: startTime },
             },
           });
 
@@ -441,17 +360,12 @@ const schema = createSchema<GraphQLContext>({
           });
         }
       },
+
       deleteScheduleById: async (_parent, { userId }, ctx) => {
         try {
-          await ctx.prisma.dayScheduleUser.deleteMany({
-            where: { userId },
-          });
-
-          const deletedUser = await ctx.prisma.user.delete({
+          return await ctx.prisma.user.delete({
             where: { id: userId },
           });
-
-          return deletedUser;
         } catch (error) {
           console.error("deleteScheduleById error:", error);
 
@@ -459,7 +373,7 @@ const schema = createSchema<GraphQLContext>({
             throw error;
           }
 
-          throw new GraphQLError("Ошибка при обновлении записи", {
+          throw new GraphQLError("Ошибка при удалении записи", {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
           });
         }
@@ -502,7 +416,11 @@ function parseAndValidateTime(start: string, end: string, date: string) {
     });
   }
 
-  return { startTime: startTime.toJSDate(), endTime: endTime.toJSDate() };
+  return {
+    date: baseDate.startOf("day").toJSDate(),
+    startTime: startTime.toJSDate(),
+    endTime: endTime.toJSDate(),
+  };
 }
 
 const yoga = createYoga({

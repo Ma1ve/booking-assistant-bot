@@ -36,38 +36,31 @@ export async function POST(req: NextRequest) {
     }
 
     if (username) {
-      let telegramAccount = await prisma.telegramAccount.findUnique({ where: { chatId } });
-      let personId: number | null = null;
+      // Upsert: создаёт Account + Person если новый, обновляет username если уже есть
+      const account = await prisma.telegramAccount.upsert({
+        where: { chatId },
+        update: { username },
+        create: {
+          chatId,
+          username,
+          person: { create: {} },
+        },
+      });
 
-      if (telegramAccount) {
-        if (!telegramAccount.personId) {
-          const person = await prisma.person.create({});
-          personId = person.id;
-
-          await prisma.telegramAccount.update({
-            where: { id: telegramAccount.id },
-            data: { personId },
-          });
-        } else {
-          personId = telegramAccount.personId;
-        }
-      } else {
-        const person = await prisma.person.create({ data: {} });
+      // Страховка для старых аккаунтов без Person
+      let personId = account.personId;
+      if (!personId) {
+        const person = await prisma.person.create({});
         personId = person.id;
-
-        telegramAccount = await prisma.telegramAccount.create({
-          data: { chatId, username, personId },
+        await prisma.telegramAccount.update({
+          where: { id: account.id },
+          data: { personId },
         });
       }
 
+      // Привязываем существующие записи User к этому Person
       const user = await prisma.user.findFirst({
-        where: {
-          person: {
-            telegram: {
-              username: username,
-            },
-          },
-        },
+        where: { person: { telegram: { username } } },
       });
 
       if (user) {

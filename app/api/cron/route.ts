@@ -14,7 +14,7 @@ export async function GET() {
     const startOfTomorrow = now.plus({ days: 1 }).startOf("day").toJSDate();
     const endOfTomorrow = now.plus({ days: 1 }).endOf("day").toJSDate();
 
-    const schedule = await prisma.daySchedule.findFirst({
+    const tomorrowUsers = await prisma.user.findMany({
       where: {
         date: {
           gte: startOfTomorrow,
@@ -22,30 +22,21 @@ export async function GET() {
         },
       },
       include: {
-        users: { include: { user: { include: { person: { include: { telegram: true } } } } } },
+        person: { include: { telegram: true } },
       },
     });
 
-    if (!schedule) {
+    if (tomorrowUsers.length === 0) {
       console.log("На завтра записей не найдено");
       return;
     }
 
-    const usersData = schedule.users.map((item) => {
-      const user = item.user;
-
-      const address = user.address;
-      const startTime = DateTime.fromJSDate(user.startTime).setZone(TIME_ZONE).toFormat("HH:mm");
-      const endTime = DateTime.fromJSDate(user.endTime).setZone(TIME_ZONE).toFormat("HH:mm");
-      const chatId = user.person?.telegram?.chatId;
-
-      return {
-        address,
-        startTime,
-        endTime,
-        chatId,
-      };
-    });
+    const usersData = tomorrowUsers.map((user) => ({
+      address: user.address,
+      startTime: DateTime.fromJSDate(user.startTime).setZone(TIME_ZONE).toFormat("HH:mm"),
+      endTime: DateTime.fromJSDate(user.endTime).setZone(TIME_ZONE).toFormat("HH:mm"),
+      chatId: user.person?.telegram?.chatId,
+    }));
 
     const uniqueUsersToNotify = usersData.filter(
       (user): user is typeof user & { chatId: string } =>

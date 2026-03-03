@@ -19,11 +19,15 @@ export function useTelegramAuth() {
   return context;
 }
 
+const isDev = process.env.NODE_ENV === "development";
+
 export function TelegramAuthGate({ children }: { children: React.ReactNode }) {
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [chatId, setChatId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(isDev ? true : null);
+  const [chatId, setChatId] = useState<string | null>(isDev ? "" : null);
 
   useEffect(() => {
+    if (isDev) return;
+
     const initData = retrieveRawInitData();
     fetch("/api/check-role", {
       method: "POST",

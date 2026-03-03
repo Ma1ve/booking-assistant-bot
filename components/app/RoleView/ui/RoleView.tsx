@@ -2,17 +2,17 @@
 
 import { useTelegramAuth } from "@/components/providers/TelegramAuthGate";
 
-import { IDaySchedule, AdminMonthSchedule } from "../../AdminMonthSchedule";
+import { MonthData, AdminMonthSchedule } from "../../AdminMonthSchedule";
 import { UserMonthSchedule } from "../../UserMonthSchedule";
 
 interface RoleViewProps {
-  days: IDaySchedule[];
+  months: MonthData[];
 }
 
-export const RoleView = ({ days }: RoleViewProps) => {
+export const RoleView = ({ months }: RoleViewProps) => {
   const telegramAuth = useTelegramAuth();
 
-  if (telegramAuth.isAdmin) return <AdminMonthSchedule days={days} />;
+  if (telegramAuth.isAdmin) return <AdminMonthSchedule months={months} />;
 
   return <UserMonthSchedule chatId={telegramAuth.chatId} />;
 };
