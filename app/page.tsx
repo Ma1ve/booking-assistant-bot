@@ -32,23 +32,21 @@ export default async function Home() {
   const nextMonthStart = currentMonthStart.plus({ months: 1 });
   const nextMonthEnd = nextMonthStart.endOf("month");
 
-  const appointments = await prisma.user.groupBy({
-    by: ["date"],
+  const appointments = await prisma.user.findMany({
     where: {
       date: {
         gte: currentMonthStart.toJSDate(),
         lte: nextMonthEnd.toJSDate(),
       },
     },
-    _count: { id: true },
+    select: { date: true },
   });
 
-  const countByDate = new Map(
-    appointments.map((a) => [
-      DateTime.fromJSDate(a.date).setZone(TIME_ZONE).startOf("day").toISODate()!,
-      a._count.id,
-    ])
-  );
+  const countByDate = new Map<string, number>();
+  for (const a of appointments) {
+    const key = DateTime.fromJSDate(a.date).setZone(TIME_ZONE).startOf("day").toISODate()!;
+    countByDate.set(key, (countByDate.get(key) ?? 0) + 1);
+  }
 
   const months: MonthData[] = [
     {
